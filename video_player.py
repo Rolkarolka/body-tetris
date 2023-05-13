@@ -22,7 +22,7 @@ class VideoWindow(QDialog):
         game_button.setText("Play Game")
         game_button.clicked.connect(self.play_tetris)
         exercises_button = QPushButton()
-        exercises_button.setText("Play Game")
+        exercises_button.setText("Do exercises")
         exercises_button.clicked.connect(self.do_exercises)
         self.buttons_layout = QHBoxLayout()
         self.buttons_layout.addWidget(game_button)

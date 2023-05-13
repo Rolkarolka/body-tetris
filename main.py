@@ -5,6 +5,13 @@ from semaphore import PoseExtractor
 from tetris_game import Tetris
 from PyQt5.QtWidgets import QApplication
 import sys
+import os.path
+
+from PyQt5.QtWidgets import *
+from PyQt5.QtMultimedia import *
+from PyQt5.QtMultimediaWidgets import *
+from PyQt5.QtCore import *
+from pathlib import Path
 
 total_end = False
 def produce_pose(queue):
@@ -19,13 +26,13 @@ def produce_pose(queue):
 
 def consume_pose(queue):
     global total_end
-    app = QApplication([])
     tetris = Tetris(lambda: queue.get(block=False) if not queue.empty() else None)
     total_end = True
-    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
+    app = QApplication([])
+    # run tetris
     queue = Queue()
     producer = Thread(target=produce_pose, args=(queue,))
     producer.start()
@@ -33,7 +40,7 @@ if __name__ == '__main__':
     consumer.start()
     producer.join()
     consumer.join()
-
+    sys.exit(app.exec_())
 
 
 

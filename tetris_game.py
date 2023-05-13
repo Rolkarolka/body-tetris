@@ -5,6 +5,13 @@ import sys
 from PyQt5.QtWidgets import QMainWindow, QFrame, QDesktopWidget, QApplication, QHBoxLayout, QLabel
 from PyQt5.QtCore import Qt, QBasicTimer, pyqtSignal
 from PyQt5.QtGui import QPainter, QColor
+import os.path
+
+from PyQt5.QtWidgets import *
+from PyQt5.QtMultimedia import *
+from PyQt5.QtMultimediaWidgets import *
+from PyQt5.QtCore import *
+from pathlib import Path
 
 from tetris_model import BOARD_DATA, Shape
 from semaphore import Move
@@ -16,7 +23,21 @@ class Tetris(QMainWindow):
         self.isPaused = False
         self.get_pose = get_pose
         self.lastShape = Shape.shapeNone
+        self.runVideo()
         self.initUI()
+
+    def runVideo(self):
+        wid = QWidget(self)
+        videoWidget = QVideoWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(videoWidget)
+        wid.setLayout(layout)
+        self.show()
+
+        player = QMediaPlayer()
+        player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.abspath(Path("video", "start.avi")))))
+        player.setVideoOutput(videoWidget)
+        player.play()
 
     def initUI(self):
         self.gridSize = 22

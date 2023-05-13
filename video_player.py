@@ -13,44 +13,44 @@ class VideoWindow(QDialog):
         super(VideoWindow, self).__init__()
 
         self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-
         self.video = QVideoWidget()
-
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.video)
         self.setLayout(self.layout)
 
         game_button = QPushButton()
         game_button.setText("Play Game")
-        game_button.clicked.connect(self.go_to_tetris)
+        game_button.clicked.connect(self.play_tetris)
         exercises_button = QPushButton()
         exercises_button.setText("Play Game")
-        exercises_button.clicked.connect(self.play_exercises)
+        exercises_button.clicked.connect(self.do_exercises)
         self.buttons_layout = QHBoxLayout()
         self.buttons_layout.addWidget(game_button)
         self.buttons_layout.addWidget(exercises_button)
 
-
         self.player.setVideoOutput(self.video)
-        self.player.mediaStatusChanged.connect(self.statusChanged)
-        self.openFile(self.filename)
+        self.player.mediaStatusChanged.connect(self.status_changed)
+        self.open_file(self.filename)
         self.player.play()
 
-    def statusChanged(self, status):
+    def status_changed(self, status):
         if status == QMediaPlayer.EndOfMedia:
             self.layout.addLayout(self.buttons_layout)
 
-    def go_to_tetris(self):
+    def play_tetris(self):
         print("Tetris time")
 
+    def do_exercises(self):
+        print("Exercises time")
+        # TODO
 
-    def openFile(self, filename):
+    def open_file(self, filename):
         self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.join(".", "video", filename))))
 
-    def exitCall(self):
+    def exit_call(self):
         sys.exit(app.exec_())
 
-    def handleError(self):
+    def handle_error(self):
         print("Error: " + self.mediaPlayer.errorString())
 
 if __name__ == '__main__':

@@ -1,71 +1,41 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-import queue
-import sys
-from PyQt5.QtWidgets import QMainWindow, QFrame, QDesktopWidget, QApplication, QHBoxLayout, QLabel
-from PyQt5.QtCore import Qt, QBasicTimer, pyqtSignal
-from PyQt5.QtGui import QPainter, QColor
-import os.path
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtMultimedia import *
-from PyQt5.QtMultimediaWidgets import *
-from PyQt5.QtCore import *
-from pathlib import Path
+from PyQt5.QtWidgets import QDesktopWidget, QHBoxLayout
+from PyQt5.QtCore import QBasicTimer
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtWidgets import QDialog, QFrame
 
 from tetris_model import BOARD_DATA, Shape
 from semaphore import Move
+# from video_player import VideoWindow
+# from config import widget
 
-class Tetris(QMainWindow):
-    def __init__(self, get_pose):
-        super().__init__()
+class Tetris(QDialog):
+    def __init__(self, get_pose=None):
+        super(Tetris, self).__init__()
         self.isStarted = False
         self.isPaused = False
         self.get_pose = get_pose
         self.lastShape = Shape.shapeNone
-        self.runVideo()
-        self.initUI()
 
-    def runVideo(self):
-        wid = QWidget(self)
-        videoWidget = QVideoWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(videoWidget)
-        wid.setLayout(layout)
-        self.show()
-
-        player = QMediaPlayer()
-        player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.abspath(Path("video", "start.avi")))))
-        player.setVideoOutput(videoWidget)
-        player.play()
-
-    def initUI(self):
         self.gridSize = 22
         self.speed = 600
         self.pose_speed = 100
 
         self.timer = QBasicTimer()
         self.pose_timer = QBasicTimer()
-        self.setFocusPolicy(Qt.StrongFocus)
+        # self.setFocusPolicy(Qt.StrongFocus)
 
-        hLayout = QHBoxLayout()
+        board_layout = QHBoxLayout()
+
         self.tboard = Board(self, self.gridSize)
-        hLayout.addWidget(self.tboard)
-
         self.sidePanel = SidePanel(self, self.gridSize)
-        hLayout.addWidget(self.sidePanel)
+        board_layout.addWidget(self.tboard)
+        board_layout.addWidget(self.sidePanel)
 
-        self.statusbar = self.statusBar()
-        self.tboard.msg2Statusbar[str].connect(self.statusbar.showMessage)
-
+        self.setLayout(board_layout)
         self.start()
-
         self.center()
-        self.setWindowTitle('Tetris')
         self.show()
-
-        self.setFixedSize(self.tboard.width() + self.sidePanel.width(),
-                          self.sidePanel.height() + self.statusbar.height())
 
     def center(self):
         screen = QDesktopWidget().screenGeometry()
@@ -80,7 +50,6 @@ class Tetris(QMainWindow):
         self.tboard.score = 0
         BOARD_DATA.clear()
 
-        self.tboard.msg2Statusbar.emit(str(self.tboard.score))
 
         BOARD_DATA.createNewPiece()
         self.timer.start(self.speed, self)
@@ -94,7 +63,6 @@ class Tetris(QMainWindow):
 
         if self.isPaused:
             self.timer.stop()
-            self.tboard.msg2Statusbar.emit("paused")
         else:
             self.timer.start(self.speed, self)
             self.pose_timer.start(self.pose_timer, self)
@@ -113,8 +81,8 @@ class Tetris(QMainWindow):
         if event.timerId() == self.timer.timerId():
             lines, result = BOARD_DATA.moveDown()
             if not result:
-                print("End")
                 self.pause()
+                self.go_to_video_player()
                 # self.__init__(self.get_pose)
             self.tboard.score += lines
             if self.lastShape != BOARD_DATA.currentShape:
@@ -122,6 +90,12 @@ class Tetris(QMainWindow):
             self.updateWindow()
         else:
             super(Tetris, self).timerEvent(event)
+
+    def go_to_video_player(self):
+        print("here")
+        # main_window = VideoWindow()
+        # widget.addWidget(main_window)
+        # widget.setCurrentIndex(widget.currentIndex() + 1)
 
     def get_move(self):
         if not self.isStarted or BOARD_DATA.currentShape == Shape.shapeNone:
@@ -186,7 +160,6 @@ class SidePanel(QFrame):
 
 
 class Board(QFrame):
-    msg2Statusbar = pyqtSignal(str)
     speed = 10
 
     def __init__(self, parent, gridSize):
@@ -220,12 +193,4 @@ class Board(QFrame):
         painter.drawLine(self.width(), 0, self.width(), self.height())
 
     def updateData(self):
-        self.msg2Statusbar.emit(str(self.score))
         self.update()
-
-
-if __name__ == '__main__':
-    # random.seed(32)
-    app = QApplication([])
-    tetris = Tetris()
-    sys.exit(app.exec_())

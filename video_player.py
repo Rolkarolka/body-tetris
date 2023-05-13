@@ -1,11 +1,14 @@
 import os.path
+from queue import Queue
 
 from PyQt5.QtCore import  QUrl
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QDialog, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QDialog, QPushButton, QHBoxLayout, QStackedWidget
 import sys
 
+from tetris_game import Tetris
+from config import widget
 class VideoWindow(QDialog):
 
     def __init__(self, filename="start.avi"):
@@ -38,24 +41,18 @@ class VideoWindow(QDialog):
             self.layout.addLayout(self.buttons_layout)
 
     def play_tetris(self):
-        print("Tetris time")
+        # widget = QStackedWidget()
+        queue = Queue()
+        tetris = Tetris(lambda: queue.get(block=False) if not queue.empty() else None)
+        widget.addWidget(tetris)
+        widget.setCurrentIndex(widget.currentIndex() + 1)
 
     def do_exercises(self):
         print("Exercises time")
         # TODO
 
     def open_file(self, filename):
-        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.join(".", "video", filename))))
-
-    def exit_call(self):
-        sys.exit(app.exec_())
+        self.player.setMedia(QMediaContent(QUrl.fromLocalFile(os.path.join("", "video", filename))))
 
     def handle_error(self):
         print("Error: " + self.mediaPlayer.errorString())
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    player = VideoWindow()
-    player.resize(640, 480)
-    player.show()
-    sys.exit(app.exec_())

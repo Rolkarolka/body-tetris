@@ -130,10 +130,3 @@ class PoseExtractor:
     @staticmethod
     def is_end():
         return cv2.waitKey(5) & 0xFF == 27
-
-if __name__ == '__main__':
-    poseExtractor = PoseExtractor()
-    while poseExtractor.is_end() is False:
-        m = poseExtractor.get_pose()
-        if m is not None:
-            print(m)

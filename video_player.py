@@ -12,6 +12,7 @@ class VideoWindow(QDialog):
 
     def __init__(self, filename="start.avi"):
         self.filename = filename
+
         super(VideoWindow, self).__init__()
 
         self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
@@ -70,5 +71,6 @@ if __name__ == '__main__':
     player = VideoWindow()
     widget.addWidget(player)
     widget.resize(640, 480)
+    # widget.showFullScreen()
     widget.show()
     sys.exit(app.exec_())

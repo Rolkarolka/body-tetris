@@ -5,7 +5,8 @@ from PyQt5.QtGui import QPainter, QColor
 from PyQt5.QtWidgets import QDialog, QFrame
 
 from tetris_model import BOARD_DATA, Shape
-from semaphore import Move
+from semaphore import Move, PoseExtractor
+
 
 class Tetris(QDialog):
     def __init__(self, get_pose=None, return_screen=lambda: print("Implement return fun")):
@@ -34,6 +35,8 @@ class Tetris(QDialog):
         self.setLayout(board_layout)
         self.start()
         self.center()
+
+        self.poseExtractor = PoseExtractor()
 
     def center(self):
         screen = QDesktopWidget().screenGeometry()
@@ -93,7 +96,8 @@ class Tetris(QDialog):
         if not self.isStarted or BOARD_DATA.currentShape == Shape.shapeNone:
             return
 
-        move = self.get_pose()
+        # move = self.get_pose()
+        move = self.poseExtractor.get_pose()
         if move is not None:
             print(move) # TODO
         if self.isPaused:

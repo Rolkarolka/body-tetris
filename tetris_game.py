@@ -6,16 +6,15 @@ from PyQt5.QtWidgets import QDialog, QFrame
 
 from tetris_model import BOARD_DATA, Shape
 from semaphore import Move
-# from video_player import VideoWindow
-# from config import widget
 
 class Tetris(QDialog):
-    def __init__(self, get_pose=None):
+    def __init__(self, get_pose=None, return_screen=lambda: print("Implement return fun")):
         super(Tetris, self).__init__()
         self.isStarted = False
         self.isPaused = False
         self.get_pose = get_pose
         self.lastShape = Shape.shapeNone
+        self.return_screen=return_screen
 
         self.gridSize = 22
         self.speed = 600
@@ -35,7 +34,6 @@ class Tetris(QDialog):
         self.setLayout(board_layout)
         self.start()
         self.center()
-        self.show()
 
     def center(self):
         screen = QDesktopWidget().screenGeometry()
@@ -67,11 +65,11 @@ class Tetris(QDialog):
             self.timer.start(self.speed, self)
             self.pose_timer.start(self.pose_timer, self)
 
-        self.updateWindow()
+        self.update_window()
 
-    def updateWindow(self):
-        self.tboard.updateData()
-        self.sidePanel.updateData()
+    def update_window(self):
+        self.tboard.update_data()
+        self.sidePanel.update_data()
         self.update()
 
     def timerEvent(self, event):
@@ -82,20 +80,14 @@ class Tetris(QDialog):
             lines, result = BOARD_DATA.moveDown()
             if not result:
                 self.pause()
-                self.go_to_video_player()
+                self.return_screen()
                 # self.__init__(self.get_pose)
             self.tboard.score += lines
             if self.lastShape != BOARD_DATA.currentShape:
                  self.lastShape = BOARD_DATA.currentShape
-            self.updateWindow()
+            self.update_window()
         else:
             super(Tetris, self).timerEvent(event)
-
-    def go_to_video_player(self):
-        print("here")
-        # main_window = VideoWindow()
-        # widget.addWidget(main_window)
-        # widget.setCurrentIndex(widget.currentIndex() + 1)
 
     def get_move(self):
         if not self.isStarted or BOARD_DATA.currentShape == Shape.shapeNone:
@@ -103,10 +95,7 @@ class Tetris(QDialog):
 
         move = self.get_pose()
         if move is not None:
-            print(move)
-        # if key == Qt.Key_P:
-        #     self.pause()
-        #     return
+            print(move) # TODO
         if self.isPaused:
             return
         elif move == Move.LEFT:
@@ -115,17 +104,17 @@ class Tetris(QDialog):
             BOARD_DATA.moveRight()
         elif move == Move.JUMP:
             BOARD_DATA.rotateLeft()
-        self.updateWindow()
+        self.update_window()
 
 
-def drawSquare(painter, x, y, val, s):
-    colorTable = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
+def draw_square(painter, x, y, val, s):
+    color_table = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
                   0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
 
     if val == 0:
         return
 
-    color = QColor(colorTable[val])
+    color = QColor(color_table[val])
     painter.fillRect(x + 1, y + 1, s - 2, s - 2, color)
 
     painter.setPen(color.lighter())
@@ -144,19 +133,19 @@ class SidePanel(QFrame):
         self.move(gridSize * BOARD_DATA.width, 0)
         self.gridSize = gridSize
 
-    def updateData(self):
+    def update_data(self):
         self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        minX, maxX, minY, maxY = BOARD_DATA.nextShape.getBoundingOffsets(0)
+        min_x, max_x, min_y, max_y = BOARD_DATA.nextShape.getBoundingOffsets(0)
 
         dy = 3 * self.gridSize
-        dx = (self.width() - (maxX - minX) * self.gridSize) / 2
+        dx = (self.width() - (max_x - min_x) * self.gridSize) / 2
 
         val = BOARD_DATA.nextShape.shape
-        for x, y in BOARD_DATA.nextShape.getCoords(0, 0, -minY):
-            drawSquare(painter, x * self.gridSize + dx, y * self.gridSize + dy, val, self.gridSize)
+        for x, y in BOARD_DATA.nextShape.getCoords(0, 0, -min_y):
+            draw_square(painter, x * self.gridSize + dx, y * self.gridSize + dy, val, self.gridSize)
 
 
 class Board(QFrame):
@@ -166,9 +155,6 @@ class Board(QFrame):
         super().__init__(parent)
         self.setFixedSize(gridSize * BOARD_DATA.width, gridSize * BOARD_DATA.height)
         self.gridSize = gridSize
-        self.initBoard()
-
-    def initBoard(self):
         self.score = 0
         BOARD_DATA.clear()
 
@@ -179,12 +165,12 @@ class Board(QFrame):
         for x in range(BOARD_DATA.width):
             for y in range(BOARD_DATA.height):
                 val = BOARD_DATA.getValue(x, y)
-                drawSquare(painter, x * self.gridSize, y * self.gridSize, val, self.gridSize)
+                draw_square(painter, x * self.gridSize, y * self.gridSize, val, self.gridSize)
 
         # Draw current shape
         for x, y in BOARD_DATA.getCurrentShapeCoord():
             val = BOARD_DATA.currentShape.shape
-            drawSquare(painter, x * self.gridSize, y * self.gridSize, val, self.gridSize)
+            draw_square(painter, x * self.gridSize, y * self.gridSize, val, self.gridSize)
 
         # Draw a border
         painter.setPen(QColor(0x777777))
@@ -192,5 +178,5 @@ class Board(QFrame):
         painter.setPen(QColor(0xCCCCCC))
         painter.drawLine(self.width(), 0, self.width(), self.height())
 
-    def updateData(self):
+    def update_data(self):
         self.update()

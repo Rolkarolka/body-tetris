@@ -41,14 +41,3 @@
 #     widget.show()
 #
 #     sys.exit(app.exec_())
-import sys
-
-from config import widget, app
-from video_player import VideoWindow
-
-if __name__ == '__main__':
-    player = VideoWindow()
-    widget.addWidget(player)
-    widget.resize(640, 480)
-    widget.show()
-    sys.exit(app.exec_())

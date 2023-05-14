@@ -3,6 +3,9 @@ import cv2
 from enum import Enum
 from math import atan2, degrees
 
+import numpy as np
+from PyQt5.QtCore import QThread, pyqtSignal
+
 
 class Move(Enum):
     LEFT = 0
@@ -10,7 +13,9 @@ class Move(Enum):
     JUMP = 2
 
 
-class PoseExtractor:
+class PoseExtractor(QThread):
+    change_pixmap_signal = pyqtSignal(np.ndarray)
+    make_move_signal = pyqtSignal(Move)
     DEFAULT_LANDMARKS_STYLE = mp.solutions.drawing_styles.get_default_pose_landmarks_style()
     VISIBILITY_THRESHOLD = .8
     JUMP_THRESHOLD = .0001
@@ -28,12 +33,19 @@ class PoseExtractor:
     }
 
     def __init__(self):
+        super().__init__()
+        self._run_flag = True
         self.last_frames = PoseExtractor.FRAME_HISTORY * [PoseExtractor.EMPTY_FRAME_STRUCT.copy()]
         self.draw_landmarks = True
         self.is_right_hand_raised = False
         self.is_left_hand_raised = False
         self.cap = cv2.VideoCapture(0)
         self.pose_model = mp.solutions.pose.Pose()
+
+    def stop(self):
+        """Sets run flag to False and waits for thread to finish"""
+        self._run_flag = False
+        self.wait()
 
     @staticmethod
     def is_missing(part):
@@ -73,8 +85,8 @@ class PoseExtractor:
 
         return jump_up and get_down
 
-    def get_pose(self):
-        if self.cap.isOpened():
+    def run(self):
+        while self.cap.isOpened() or self._run_flag:
             success, image = self.cap.read()
             if not success: return
             image.flags.writeable = False
@@ -89,8 +101,8 @@ class PoseExtractor:
                     pose_results.pose_landmarks,
                     mp.solutions.pose.POSE_CONNECTIONS,
                     PoseExtractor.DEFAULT_LANDMARKS_STYLE)
-                cv2.imshow('Youtine', image)
-            # print([id(x) for x in self.last_frames])
+            self.change_pixmap_signal.emit(image)
+
             if pose_results.pose_landmarks:
                 self.last_frames = self.last_frames[1:] + [PoseExtractor.EMPTY_FRAME_STRUCT.copy()]
                 body = []
@@ -100,13 +112,12 @@ class PoseExtractor:
                         'y': 1 - point.y,
                         'visibility': point.visibility
                     })
-
                 shoulder_l, elbow_l, wrist_l = body[11], body[13], body[15]
                 arm_l = (shoulder_l, elbow_l, wrist_l)
                 if self.is_arm_lifted(arm_l, Move.LEFT):
                     if self.is_left_hand_raised is False:
                         self.is_left_hand_raised = True
-                        return Move.LEFT
+                        self.make_move_signal.emit(Move.LEFT)
                 elif self.is_left_hand_raised is True:
                     self.is_left_hand_raised = False
 
@@ -115,25 +126,14 @@ class PoseExtractor:
                 if self.is_arm_lifted(arm_r, Move.RIGHT):
                     if self.is_right_hand_raised is False:
                         self.is_right_hand_raised = True
-                        return Move.RIGHT
+                        self.make_move_signal.emit(Move.RIGHT)
                 elif self.is_right_hand_raised is True:
                     self.is_right_hand_raised = False
-
                 hip_l, hip_r = body[23], body[24]
                 if self.is_jumping(hip_l, hip_r):
-                    return Move.JUMP
+                    self.make_move_signal.emit(Move.JUMP)
+        self.cap.release()
+        self.cap = None
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.cap.release()
-        cv2.destroyAllWindows()
-
-    @staticmethod
-    def is_end():
-        return cv2.waitKey(5) & 0xFF == 27
-
-if __name__ == '__main__':
-    poseExtractor = PoseExtractor()
-    while poseExtractor.is_end() is False:
-        m = poseExtractor.get_pose()
-        if m is not None:
-            print(m)
+        self.stop()

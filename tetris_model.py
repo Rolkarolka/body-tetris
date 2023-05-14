@@ -153,7 +153,6 @@ class BoardData(object):
 
     def rotateLeft(self):
         if self.tryMoveCurrent((self.currentDirection - 1) % 4, self.currentX, self.currentY):
-            print("Rotated")
             self.currentDirection -= 1
             self.currentDirection %= 4
 

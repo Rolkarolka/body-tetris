@@ -13,11 +13,12 @@ from semaphore import Move, PoseExtractor
 class Tetris(QDialog):
     def __init__(self, get_pose=None, return_screen=lambda: print("Implement return fun")):
         super(Tetris, self).__init__()
+        self.setStyleSheet("color: rgb(240, 240, 240); background-color: rgb(16, 16, 16);")
         self.isStarted = False
         self.isPaused = False
         self.get_pose = get_pose
         self.lastShape = Shape.shapeNone
-        self.return_screen=return_screen
+        self.return_screen = return_screen
 
         self.gridSize = 22
         self.speed = 600
@@ -29,7 +30,6 @@ class Tetris(QDialog):
         # self.setFocusPolicy(Qt.StrongFocus)
 
         board_layout = QHBoxLayout()
-
 
         self.tboard = Board(self, self.gridSize)
         self.sidePanel = SidePanel(self, self.gridSize)
@@ -49,7 +49,6 @@ class Tetris(QDialog):
         self.start()
         self.center()
 
-
     def center(self):
         screen = QDesktopWidget().screenGeometry()
         size = self.geometry()
@@ -62,7 +61,6 @@ class Tetris(QDialog):
         self.isStarted = True
         self.tboard.score = 0
         BOARD_DATA.clear()
-
 
         BOARD_DATA.createNewPiece()
         self.timer.start(self.speed, self)
@@ -110,7 +108,7 @@ class Tetris(QDialog):
                 self.return_screen()
             self.tboard.score += lines
             if self.lastShape != BOARD_DATA.currentShape:
-                 self.lastShape = BOARD_DATA.currentShape
+                self.lastShape = BOARD_DATA.currentShape
             self.update_window()
         else:
             super(Tetris, self).timerEvent(event)
@@ -132,8 +130,8 @@ class Tetris(QDialog):
 
 
 def draw_square(painter, x, y, val, s):
-    color_table = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
-                  0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
+    color_table = [0xCCCCCC, 0xCC6666, 0x66CC66, 0x6666CC,
+                   0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
 
     if val == 0:
         return
@@ -198,7 +196,7 @@ class Board(QFrame):
 
         # Draw a border
         painter.setPen(QColor(0x777777))
-        painter.drawLine(self.width()-1, 0, self.width()-1, self.height())
+        painter.drawLine(self.width() - 1, 0, self.width() - 1, self.height())
         painter.setPen(QColor(0xCCCCCC))
         painter.drawLine(self.width(), 0, self.width(), self.height())
 

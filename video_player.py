@@ -1,19 +1,21 @@
 import os.path
 from queue import Queue
 
-from PyQt5.QtCore import  QUrl
+from PyQt5.QtCore import QUrl
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QVBoxLayout, QDialog, QPushButton, QHBoxLayout, QStackedWidget, QApplication
 import sys
 
 from tetris_game import Tetris
-class VideoWindow(QDialog):
 
+
+class VideoWindow(QDialog):
     def __init__(self, filename="start.avi"):
         self.filename = filename
 
         super(VideoWindow, self).__init__()
+        self.setStyleSheet("color: rgb(240, 240, 240); background-color: rgb(16, 16, 16);")
 
         self.player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         self.video = QVideoWidget()
@@ -50,10 +52,12 @@ class VideoWindow(QDialog):
     def handle_error(self):
         print("Error: " + self.mediaPlayer.errorString())
 
+
 def go_to_video_player():
     main_window = VideoWindow("up_and_down.avi")
     widget.addWidget(main_window)
     widget.setCurrentIndex(widget.currentIndex() + 1)
+
 
 def play_tetris():
     queue = Queue()

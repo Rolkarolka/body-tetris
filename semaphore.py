@@ -6,6 +6,8 @@ from math import atan2, degrees
 import numpy as np
 from PyQt5.QtCore import QThread, pyqtSignal
 
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
 
 class Move(Enum):
     LEFT = 0
@@ -16,7 +18,7 @@ class Move(Enum):
 class PoseExtractor(QThread):
     change_pixmap_signal = pyqtSignal(np.ndarray)
     make_move_signal = pyqtSignal(Move)
-    DEFAULT_LANDMARKS_STYLE = mp.solutions.drawing_styles.get_default_pose_landmarks_style()
+    # DEFAULT_LANDMARKS_STYLE = mp.solutions.drawing_styles.get_default_pose_landmarks_style()
     VISIBILITY_THRESHOLD = .8
     JUMP_THRESHOLD = .0001
     FRAME_HISTORY = 8
@@ -96,11 +98,13 @@ class PoseExtractor(QThread):
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
             if self.draw_landmarks:
-                mp.solutions.drawing_utils.draw_landmarks(
-                    image,
-                    pose_results.pose_landmarks,
-                    mp.solutions.pose.POSE_CONNECTIONS,
-                    PoseExtractor.DEFAULT_LANDMARKS_STYLE)
+                mp_drawing.draw_landmarks(
+                    image, pose_results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+                # mp.solutions.drawing_utils.draw_landmarks(
+                #     image,
+                #     pose_results.pose_landmarks,
+                #     mp.solutions.pose.POSE_CONNECTIONS,
+                #     PoseExtractor.DEFAULT_LANDMARKS_STYLE)
             self.change_pixmap_signal.emit(image)
 
             if pose_results.pose_landmarks:

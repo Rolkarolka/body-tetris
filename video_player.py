@@ -74,7 +74,7 @@ if __name__ == '__main__':
     widget = QStackedWidget()
     player = VideoWindow()
     widget.addWidget(player)
-    widget.resize(640, 480)
+    widget.resize(1400, 1250)
     # widget.showFullScreen()
     widget.show()
     sys.exit(app.exec_())

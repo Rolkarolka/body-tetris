@@ -20,11 +20,11 @@ class Tetris(QDialog):
         self.lastShape = Shape.shapeNone
         self.return_screen = return_screen
 
-        self.gridSize = 22
+        self.gridSize = 44
         self.speed = 600
         self.pose_speed = 100
-        self.camera_width = 320
-        self.camera_height = 240
+        self.camera_width = 640
+        self.camera_height = 480
 
         self.timer = QBasicTimer()
         # self.setFocusPolicy(Qt.StrongFocus)

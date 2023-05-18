@@ -2,6 +2,7 @@ import mediapipe as mp
 import cv2
 from enum import Enum
 from math import atan2, degrees
+from time import sleep
 
 import numpy as np
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -42,6 +43,7 @@ class PoseExtractor(QThread):
         self.is_right_hand_raised = False
         self.is_left_hand_raised = False
         self.cap = cv2.VideoCapture(0)
+        # self.cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720, format=(string)NV12, framerate=(fraction)30/1 ! nvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! appsink')
         self.pose_model = mp.solutions.pose.Pose()
 
     def stop(self):
@@ -88,6 +90,7 @@ class PoseExtractor(QThread):
         return jump_up and get_down
 
     def run(self):
+        sleep(2)
         while self.cap.isOpened() or self._run_flag:
             success, image = self.cap.read()
             if not success: return
@@ -140,4 +143,5 @@ class PoseExtractor(QThread):
         self.cap = None
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        print('I EXITED YEAY I ACTUALLY DID SOMETHING')
         self.stop()

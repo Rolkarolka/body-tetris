@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from queue import Queue
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QDesktopWidget, QHBoxLayout, QLabel
 from PyQt5.QtCore import QBasicTimer, pyqtSlot, Qt
@@ -14,11 +13,9 @@ from semaphore import Move, PoseExtractor
 class Tetris(QDialog):
     def __init__(self, return_screen=lambda: print("Implement return fun")):
         super(Tetris, self).__init__()
-        self.queue = Queue()
         self.setStyleSheet("color: rgb(240, 240, 240); background-color: rgb(16, 16, 16);")
         self.isStarted = False
         self.isPaused = False
-        self.get_pose = lambda: self.queue.get(block=False) if not self.queue.empty() else None
         self.lastShape = Shape.shapeNone
         self.return_screen = return_screen
 
@@ -49,8 +46,6 @@ class Tetris(QDialog):
         self.setLayout(board_layout)
 
     def run(self):
-        while not self.queue.empty():
-            self.queue.get(block=False)
         self.thread.start()
         self.start()
         self.center()

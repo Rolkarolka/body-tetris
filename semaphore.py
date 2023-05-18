@@ -43,7 +43,7 @@ class PoseExtractor(QThread):
         self.is_right_hand_raised = False
         self.is_left_hand_raised = False
         self.cap = cv2.VideoCapture(0)
-        # self.cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720, format=(string)NV12, framerate=(fraction)30/1 ! nvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! appsink')
+        # self.cap = cv2.VideoCapture('nvarguscamerasrc ! video/x-raw(memory:NVMM), width=1280, height=720, format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! appsink')
         self.pose_model = mp.solutions.pose.Pose()
 
     def stop(self):
